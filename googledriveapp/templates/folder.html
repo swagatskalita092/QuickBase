@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block body %}
+{% load static %}
+<style>
+  body {
+    background-color: #E0FFFF;
+    background-image: url("{% static 'https://images.pexels.com/photos/82256/pexels-photo-82256.jpeg?auto=compress&cs=tinysrgb&w=600' %}");
+    background-size: cover;
+    background-position: center;
+  }
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .card-title {
+    margin-top: 10px;
+  }
+
+  .btn-outline-info, .btn-outline-danger {
+    margin-top: 10px;
+    font-size: 14px;
+    padding: 5px 20px;
+    width: auto;
+    border-radius: 50px;
+  }
+  .btn-upload {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+  }
+  .col-sm {
+    margin-bottom: 20px;
+  }
+  .file-card {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  .rename-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+  .save-rename-btn {
+    margin-top: 10px;
+    font-size: 12px;
+    padding: 5px 5px;
+  }
+</style>
+<script>
+  function toggleRenameInput(fileId) {
+    const renameInput = document.getElementById(`rename-input-${fileId}`);
+    const renameBtn = document.getElementById(`rename-btn-${fileId}`);
+    const saveRenameBtn = document.getElementById(`save-rename-btn-${fileId}`);
+
+    renameInput.style.display = renameInput.style.display === 'none' ? 'inline-block' : 'none';
+    renameBtn.innerText = renameBtn.innerText === 'Rename' ? 'Cancel' : 'Rename';
+    saveRenameBtn.style.display = saveRenameBtn.style.display === 'none' ? 'inline-block' : 'none';
+  }
+</script>
+
+<div style="display: flex; justify-content: space-between; padding: 5px 10px">
+  <div class="">
+    <div class="container py-3">
+      <div class="row">
+        {% for i in files %}
+          <div class="col-sm">
+            <div class="card file-card" style="width: 18rem">
+              <div class="card-body">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                {% if i.filedetails == 'Image' %}
+                  <i class="fa fa-image" style="font-size:50px;color:orange;"></i>
+                {% elif i.filedetails == 'PDF' %}
+                  <i class="fa fa-file-pdf-o" style="font-size:50px;color:red;"></i>
+                {% elif i.filedetails == 'Word' %}
+                  <i class="fa fa-file-text" style="font-size:50px;color:blue;"></i>
+                {% elif i.filedetails == 'Excel' %}
+                  <i class="fa fa-file-excel-o" style="font-size:50px;color:green;"></i>
+                {% else %}
+                  <i class="fa fa-file" style="font-size:50px;color:gray;"></i>
+                {% endif %}
+                <h5 class="card-title">
+                  <span id="file-title-{{ i.id }}">{{ i.filetitle }}</span>
+                  <input type="text" id="rename-input-{{ i.id }}" class="rename-input" style="display: none;" placeholder="Enter new title">
+                  <button id="rename-btn-{{ i.id }}" class="btn btn-outline-secondary rename-btn" onclick="toggleRenameInput('{{ i.id }}')">Rename</button>
+                  <button id="save-rename-btn-{{ i.id }}" class="btn btn-outline-success save-rename-btn" style="display: none;">Save</button>
+                </h5>
+                <a href="{{i.file.url}}" download="{{i.file}}" class="btn btn-outline-info">Download</a>
+                <a href="{% url 'delete_file' i.id %}" class="btn btn-outline-danger">Delete</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="">
+    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      UPLOAD FILE
+    </button>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">UPLOAD FILE</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form action="{% url 'folder' folderid %}" method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="exampleFormControlInput1" class="form-label">File Name</label>
+                <input type="file" class="form-control" id="exampleFormControlInput1" name="file" />
+                <label for="exampleFormControlInput1" class="form-label">File Title</label>
+                <input type="text" class="form-control" id="exampleFormControlInput1" name="filetitle" />
+                <button class="btn btn-outline-success my-3">Upload File</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock body %}
